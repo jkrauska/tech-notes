@@ -4,7 +4,7 @@
 
 I run my docker instances directly on my LAN by briging the docker0 interface with eth0.
 
-'''
+```
 # /etc/network/interfaces
 # The primary network interface
 auto eth0
@@ -13,7 +13,7 @@ iface eth0 inet manual
 auto docker0
 iface docker0 inet dhcp
       bridge_ports eth0
-'''
+```
 
 This has the benefit of allowing me to directly access them instead of needing to to awkward handling of TCP ports, etc.
 
@@ -25,4 +25,26 @@ Since I'm using instances on the LAN, I want to use dhcp. It lets me use static 
 
 Getting dhclient to work inside docker is oddly difficult.
 
-* You need to give extended privileges to this container -- use --privileged
+* You need to give extended privileges to this container: use *--privileged*
+* By default every time docker starts, you get a new mac address, you can fix this using lxc hooks
+** You need to run the client and daemon in lxc mode (since docker 1)
+*** /etc/default/docker: DOCKER_OPTS="-e lxc"
+*** docker run -e lxc
+** You have to work around app armor not wanting you to run dhclient -- cp /sbin/dhclient /usr/sbin/dhclient
+
+
+Putting it all together in to a simple run.sh script.
+
+```bash
+#!/bin/bash -x
+
+# hostname (reported to dhcpd)
+hostname='dashing-it'
+# mac address (Random - but must be unique)
+macaddr='86:b5:6c:e1:35:d5'
+
+docker run -e lxc --lxc-conf="lxc.network.hwaddr=${macaddr}"  --detach  --privileged --hostname="${hostname}" ubuntu /bin/bash
+````
+
+Now inside that instance, you can run /usr/sbin/dhclient and it will work.
+

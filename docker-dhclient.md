@@ -1,4 +1,4 @@
-## dhclient in docker https://www.docker.com/
+## getting dhclient working in docker
 
 **Note:** This is way more complicated that it really ought to be.
 
@@ -34,7 +34,8 @@ Getting dhclient to work inside docker is oddly difficult.
   - You need to run the daemon and client in lxc mode (since docker 1)
     - Daemon: /etc/default/docker: **DOCKER_OPTS="-e lxc"**
     - Client: **docker run -e lxc** ...
-  - You have to work around app armor not wanting you to run dhclient -- **cp /sbin/dhclient /usr/sbin/dhclient** (ugh)
+  - You need to use the **--lxc-conf="lxc.network.hwaddr=XX"** option to set the mac addr.
+  - You have to work around app armor not wanting you to run dhclient -- **cp /sbin/dhclient /usr/sbin/dhclient** (libc error)
 
 
 Putting it all together in to a simple run.sh script.
@@ -47,12 +48,14 @@ hostname='dashing-it'
 # mac address (Random - but must be unique)
 macaddr='86:b5:6c:e1:35:d5'
 
-docker run -e lxc --lxc-conf="lxc.network.hwaddr=${macaddr}"	--privileged --hostname="${hostname}" ubuntu /bin/bash
+docker run -e lxc --lxc-conf="lxc.network.hwaddr=${macaddr}" --privileged --hostname="${hostname}" ubuntu /bin/bash
 ````
 
 Now inside that instance, you can run ```cp /sbin/dhclient /usr/sbin/dhclinet && /usr/sbin/dhclient``` and it will work.
 
 **Further Notes:**
+- I could use dynamic mac addresses, but the way my dhcp/dns server work together, it's nicer to be able to have the same mac for one instance.
+  - If I start it too quickly the new dns record will not work...
 - Manually setting the mac address is supposedly a forthcoming feature in the docker container layer. (removing the need for lxc)
 - Supposedly you can get **pipeworks** to do some similar work, but it seems somehow less straightforward than this mess.
 

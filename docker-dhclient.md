@@ -57,7 +57,7 @@ Now inside that instance, you can run ```cp /sbin/dhclient /usr/sbin/dhclinet &&
   - If I start it too quickly the new dns record will not work...
 - Manually setting the mac address is supposedly a forthcoming feature in the docker container layer. (removing the need for lxc)
 - Supposedly you can get **pipeworks** to do some similar work, but it seems somehow less straightforward than this mess.
-
+- docker is still self  assigning an IP in the instance -- I need to free that up and give it back
 
 
 

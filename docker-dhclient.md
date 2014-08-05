@@ -25,12 +25,12 @@ Since I'm using instances on the LAN, I want to use dhcp. It lets me use static 
 
 Getting dhclient to work inside docker is oddly difficult.
 
-* You need to give extended privileges to this container: use *--privileged*
-* By default every time docker starts, you get a new mac address, you can fix this using lxc hooks
-** You need to run the client and daemon in lxc mode (since docker 1)
-*** /etc/default/docker: DOCKER_OPTS="-e lxc"
-*** docker run -e lxc
-** You have to work around app armor not wanting you to run dhclient -- cp /sbin/dhclient /usr/sbin/dhclient
+- You need to give extended privileges to this container: use *--privileged*
+- By default every time docker starts, you get a new mac address, you can fix this using lxc hooks
+  - You need to run the daemon and client in lxc mode (since docker 1)
+    - Daemon: /etc/default/docker: DOCKER_OPTS="-e lxc"
+    - Client: docker run -e lxc ...
+  - You have to work around app armor not wanting you to run dhclient -- *cp /sbin/dhclient /usr/sbin/dhclient* (ugh)
 
 
 Putting it all together in to a simple run.sh script.
@@ -46,5 +46,13 @@ macaddr='86:b5:6c:e1:35:d5'
 docker run -e lxc --lxc-conf="lxc.network.hwaddr=${macaddr}"  --detach  --privileged --hostname="${hostname}" ubuntu /bin/bash
 ````
 
-Now inside that instance, you can run /usr/sbin/dhclient and it will work.
+Now inside that instance, you can run ```cp /sbin/dhclient /usr/sbin/dhclinet && /usr/sbin/dhclient``` and it will work.
+
+*Further Notes:*
+- Manually setting the mac address is supposedly a forthcoming feature in the docker container layer. (removing the need for lxc)
+- Supposedly you can get pipeworks to do some similar work, but it seems somehow less straightforward than this mess.
+
+
+
+
 

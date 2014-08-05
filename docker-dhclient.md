@@ -3,10 +3,9 @@
 **Note:** This is way more complicated that it really ought to be.
 
 **My Environment:**
-Ubuntu 14.04
-Docker 1.1.2 (installed via ppt)
-
-I run my docker instances directly on my LAN by briging the docker0 interface with eth0.
+- Ubuntu 14.04
+- Docker 1.1.2 (installed via ppt)
+- Network: I run my docker instances directly on my LAN by briging the docker0 interface with eth0.
 
 ```
 # /etc/network/interfaces

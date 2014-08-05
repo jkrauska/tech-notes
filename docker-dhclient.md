@@ -1,6 +1,6 @@
 ## getting dhclient working in docker
 
-**Note:** This is way more complicated that it really ought to be.
+**Personal Note:** I feel this is way more complicated that it really ought to be.
 
 **My Environment:**
 - Ubuntu 14.04
@@ -18,7 +18,7 @@ iface docker0 inet dhcp
       bridge_ports eth0
 ```
 
-This has the benefit of allowing me to directly access them instead of needing to to awkward handling of TCP ports, etc.
+Using dhcpd on docker has the primary benefit of allowing me to directly access an instance instead of needing to do awkward handling of TCP ports, etc.
 
 This is not the **default** docker configuration because more people are likely to use docker in cloud environments where the local 'lan' is not under their control.
 (docker instead uses it's own subnetted IP space only reachable on the parent node)
@@ -26,15 +26,15 @@ This is not the **default** docker configuration because more people are likely 
 Since I'm using instances on the LAN, I want to use dhcp. It lets me use static records, it lets me have a central database of nodes, etc..
 (there is the added benefit in my environment of autogenerating dns records)
 
-Getting dhclient to work inside docker is oddly difficult.
 
-- You need to give extended privileges to this container: use **--privileged**
+So here's how you do it:
+- Give extended privileges to this container: use **--privileged**
 - By default every time docker starts, you get a new mac address, you can fix this using lxc hooks
   - You need to run the daemon and client in lxc mode (since docker 1)
     - Daemon: /etc/default/docker: **DOCKER_OPTS="-e lxc"**
     - Client: **docker run -e lxc** ...
-  - You need to use the **--lxc-conf="lxc.network.hwaddr=XX"** option to set the mac addr.
-  - You have to work around app armor not wanting you to run dhclient -- **cp /sbin/dhclient /usr/sbin/dhclient** (libc error)
+  - Use the **--lxc-conf="lxc.network.hwaddr=XX"** option to set the mac addr.
+  - Work around app armor not wanting you to run dhclient -- **cp /sbin/dhclient /usr/sbin/dhclient** (libc error)
 
 
 Putting it all together in to a simple run.sh script.

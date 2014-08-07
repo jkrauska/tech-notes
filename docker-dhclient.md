@@ -53,10 +53,12 @@ docker run -e lxc --lxc-conf="lxc.network.hwaddr=${macaddr}" --privileged --host
 Now inside that instance, you can run ```cp /sbin/dhclient /usr/sbin/dhclinet && /usr/sbin/dhclient``` and it will work.
 
 **Further Notes:**
+- Supposedly you can get **pipeworks** to do some similar work, but it seems somehow less straightforward than this mess.
+  - Note: pipeworks looks promising, but it happens after a reboot --  It doesn't look like pipeworks would survive a reboot.
 - I could use dynamic mac addresses, but the way my dhcp/dns server work together, it's nicer to be able to have the same mac for one instance.
   - If I start it too quickly the new dns record will not work...
 - Manually setting the mac address is supposedly a forthcoming feature in the docker container layer. (removing the need for lxc)
-- Supposedly you can get **pipeworks** to do some similar work, but it seems somehow less straightforward than this mess.
+
 - docker is still self  assigning an IP in the instance -- I need to free that up and give it back
 
 
